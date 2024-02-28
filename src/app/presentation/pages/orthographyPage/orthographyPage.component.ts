@@ -8,6 +8,7 @@ import { TextMessageBoxEvent, TextMessageBoxSelectComponent } from '@components/
 import { TypingLoaderComponent } from '@components/typingLoader/typingLoader.component';
 import { Message } from '@interfaces/message.interface';
 import { OpenAiService } from '../../services/openai.service';
+import { GptMessageOrthographyComponent } from '@components/chat-bubbles/gptMessageOrthography/gptMessageOrthography.component';
 
 
 @Component({
@@ -21,24 +22,37 @@ import { OpenAiService } from '../../services/openai.service';
     TextMessageBoxComponent,
     TextMessageBoxFileComponent,
     TextMessageBoxSelectComponent,
+    GptMessageOrthographyComponent,
   ],
   templateUrl: './orthographyPage.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class OrthographyPageComponent {
-  
-  public messages = signal<Message[]>([{ text: 'Hola mundo', isGpt: true }]);
+  public messages = signal<Message[]>([]);
   public isLoading = signal(false);
   public openAiService = inject(OpenAiService);
 
-  handleMessage(prompt: string) {}
+  handleMessage(prompt: string) {
+    this.isLoading.set(true);
+    this.messages.update((prev) => [
+      ...prev,
+      {
+        isGpt: false,
+        text: prompt,
+      },
+    ]);
 
-  handleMessageWithFile({ prompt, file }: TextMessageEvent) {
-    console.log(prompt);
-    console.log(file);
-  }
+    this.openAiService.checkOrthography(prompt).subscribe((resp) => {
+      this.isLoading.set(false);
 
-  handleMessageWithSelect(event: TextMessageBoxEvent) {
-    console.log(event);
+      this.messages.update((prev) => [
+        ...prev,
+        {
+          isGpt: true,
+          text: resp.message,
+          info: resp,
+        },
+      ]);
+    });
   }
 }
