@@ -1,1 +1,23 @@
-<p>prosConsStreamPage works!</p>,
+<div class="chat-container">
+    <div class="chat-messages">
+
+        <div class="grid gap-y-2">
+
+
+            <app-chat-message text="¿Que deseas comparar - stream"></app-chat-message>
+
+            <ng-container *ngFor="let message of messages(); track message?.text ">
+                <app-chat-message *ngIf="message.isGpt" [text]="message.text"></app-chat-message>
+                <app-my-message *ngIf="!message.isGpt" [text]="message.text"></app-my-message>
+
+            </ng-container>
+
+            <app-typing-loader *ngIf="isLoading()"></app-typing-loader>
+        </div>
+    </div>
+
+    <!-- messagesBox -->
+    <app-text-message-box placeholder="Escribe aquí lo que deseas" (onMessage)="handleMessage( $event )">
+    </app-text-message-box>
+
+</div>
